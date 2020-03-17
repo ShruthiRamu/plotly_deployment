@@ -107,54 +107,70 @@ function buildBubbleCharts(sample) {
 
 function buildGaugeCharts(sample) {
   d3.json("samples.json").then((data) => {
-    var samples = data.samples;
-    var resultArray = samples.filter(sampleObj => sampleObj.id == sample);
+    var metadata = data.metadata;
+    var resultArray = metadata.filter(sampleObj => sampleObj.id == sample);
     var result = resultArray[0];
+    
+    /*define x and y position of pointer tip*/
+	var degrees = (9-result.wfreq)*20,
+  radius = .5;
+var radians = degrees * Math.PI / 180;
+var x = radius * Math.cos(radians);
+var y = radius * Math.sin(radians);
 
-    var topTensamples = result.sample_values.slice(0,10).reverse();
-    
-    var topTenOTU  = result.otu_ids.slice(0,10).reverse();
-    var topTenLabel = result.otu_labels.slice(0,10).reverse();
+/*create a triangle to represent a pointer*/
+var mainPath = 'M .0 -0.025 L .0 0.025 L ',
+  pathX = String(x),
+  space = ' ',
+  pathY = String(y),
+  pathEnd = ' Z';
+var path = mainPath.concat(pathX,space,pathY,pathEnd);
+/*define data for dot (scatter) and pie chart*/
+var datagauge = [
+{ type: 'scatter',
+  x: [0,], y:[0],
+ marker: {size: 28, color:'850000'},
+ showlegend: false,
+ name: 'scrubs',
+ text: result.wfreq,
+ hoverinfo: 'text+name'},
+ 
+ { values: [50/9, 50/9, 50/9, 50/9, 50/9, 50/9,50/9,50/9,50/9, 50],
+ rotation: 90,
+ text: ['8-9', '7-8', '6-7','5-6', '4-5', '3-4', '2-3',
+         '1-2', '0-1', ''],
+ textinfo: 'text',
+ textposition:'inside',
+ marker: {colors:['rgba(30,120,30, .5)', 'rgba(55,135,55, .5)','rgba(80,150,80, .5)',
+         'rgba(105,165,105, .5)', 'rgba(130,180,130, .5)','rgba(155,195,155, .5)',
+          'rgba(180,210,180, .5)','rgba(205,225,205, .5)', 'rgba(230,240,230, .5)',
+                      'rgba(255, 255, 255, 0)']},
+ hoverinfo: 'none',
+ hole: .5,
+ type: 'pie',
+ showlegend: false}
+];
+/*define the layout, shape and path*/
+var layout = {
+   shapes:[{
+     type: 'path',
+     path: path,
+     fillcolor: '850000',
+     line: { color: '850000' }
+   }],
+   title: '<b>Belly Button Washing Frequency</b><br>Scrups per Week',
+   height: 600,
+   width: 600,
+   /*move the zero point to the middle of the pie chart*/
+   xaxis: {zeroline:false, showticklabels:false,
+          showgrid: false, range: [-1, 1]},
+   yaxis: {zeroline:false, showticklabels:false,
+          showgrid: false, range: [-1, 1]}
+ };
 
-    topTenOTU = topTenOTU.map(item =>  ('OTU ' + item.toString()));
-    
-    
+Plotly.newPlot('gauge', datagauge, layout);
 
-    var data = [
-      {
-        type: "indicator",
-        mode: "gauge+number+delta",
-        value: 420,
-        title: { text: "Speed", font: { size: 24 } },
-        delta: { reference: 400, increasing: { color: "RebeccaPurple" } },
-        gauge: {
-          axis: { range: [null, 500], tickwidth: 1, tickcolor: "darkblue" },
-          bar: { color: "darkblue" },
-          bgcolor: "white",
-          borderwidth: 2,
-          bordercolor: "gray",
-          steps: [
-            { range: [0, 250], color: "cyan" },
-            { range: [250, 400], color: "royalblue" }
-          ],
-          threshold: {
-            line: { color: "red", width: 4 },
-            thickness: 0.75,
-            value: 490
-          }
-        }
-      }
-    ];
-    
-    var layout = {
-      width: 500,
-      height: 400,
-      margin: { t: 25, r: 25, l: 25, b: 25 },
-      paper_bgcolor: "lavender",
-      font: { color: "darkblue", family: "Arial" }
-    };
-        
-    Plotly.newPlot('gauge', data, layout);
+     
   });
 }
 
