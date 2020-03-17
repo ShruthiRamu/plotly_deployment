@@ -9,7 +9,7 @@ const url = "https://api.spacexdata.com/v2/launchpads";
 
 function optionChanged(newSample) {
   buildMetadata(newSample);
-  //buildCharts(newSample);
+  buildCharts(newSample);
 }
 
 function buildMetadata(sample) {
@@ -30,6 +30,47 @@ function buildMetadata(sample) {
 
   });
 }
+
+function buildCharts(sample) {
+  d3.json("samples.json").then((data) => {
+    var samples = data.samples;
+    var resultArray = samples.filter(sampleObj => sampleObj.id == sample);
+    var result = resultArray[0];
+
+    //var sorted_samples = result.sample_values.sort((a,b) => a - b).reverse();
+    var topTensamples = result.sample_values.slice(0,10).reverse();
+    
+    var topTenOTU  = result.otu_ids.slice(0,10).reverse();
+    var topTenLabel = result.otu_labels.slice(0,10).reverse();
+
+    topTenOTU = topTenOTU.map(item =>  ('OTU ' + item.toString()));
+    
+    
+    var trace1 = {
+      x: topTensamples,
+      y: topTenOTU,
+      text: topTenLabel,
+      type: "bar",
+      orientation: "h"
+    };
+    // data
+    var data = [trace1];
+
+    // Apply the group bar mode to the layout
+  /*var layout = {
+  margin: {
+    l: 100,
+    r: 100,
+    t: 100,
+    b: 100
+  }
+  };*/
+
+  // Render the plot to the div tag with id "plot"
+  Plotly.newPlot("bar", data);
+  });
+}
+
 
 function init() {
     var selector = d3.select("#selDataset");
