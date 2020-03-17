@@ -37,7 +37,6 @@ function buildCharts(sample) {
     var resultArray = samples.filter(sampleObj => sampleObj.id == sample);
     var result = resultArray[0];
 
-    //var sorted_samples = result.sample_values.sort((a,b) => a - b).reverse();
     var topTensamples = result.sample_values.slice(0,10).reverse();
     
     var topTenOTU  = result.otu_ids.slice(0,10).reverse();
@@ -55,16 +54,6 @@ function buildCharts(sample) {
     };
     // data
     var data = [trace1];
-
-    // Apply the group bar mode to the layout
-  /*var layout = {
-  margin: {
-    l: 100,
-    r: 100,
-    t: 100,
-    b: 100
-  }
-  };*/
 
   // Render the plot to the div tag with id "plot"
   Plotly.newPlot("bar", data);
